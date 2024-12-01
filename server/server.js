@@ -43,3 +43,6 @@ app.post('/add-car', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+const cors = require('cors');
+app.use(cors());  // Allow all cross-origin requests
+
