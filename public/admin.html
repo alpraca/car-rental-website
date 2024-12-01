@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <form id="addCarForm">
+    <input type="text" id="name" placeholder="Car Name" required>
+    <input type="text" id="price" placeholder="Car Price" required>
+    <input type="text" id="location" placeholder="Car Location" required>
+    <button type="submit">Add Car</button>
+  </form>
+  <script>
+    document.getElementById('addCarForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const car = {
+      name: document.getElementById('name').value,
+      price: document.getElementById('price').value,
+      location: document.getElementById('location').value
+    };
+  
+    const response = await fetch('/add-car', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': 'your-secret-api-key-here'  // API key automatically added here
+      },
+      body: JSON.stringify(car)
+    });
+  
+    if (response.ok) {
+      alert('Car added successfully!');
+    } else {
+      alert('Failed to add car.');
+    }
+  });
+  
+  </script>
+</body>
+</html>
