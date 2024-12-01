@@ -13,31 +13,32 @@
     <input type="text" id="location" placeholder="Car Location" required>
     <button type="submit">Add Car</button>
   </form>
+  
   <script>
     document.getElementById('addCarForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const car = {
-      name: document.getElementById('name').value,
-      price: document.getElementById('price').value,
-      location: document.getElementById('location').value
-    };
-  
-    const response = await fetch('https://car-rental-website-omega.vercel.app/admin.html', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0'  // API key automatically added here
-      },
-      body: JSON.stringify(car)
+      e.preventDefault();
+      
+      const car = {
+        name: document.getElementById('name').value,
+        price: document.getElementById('price').value,
+        location: document.getElementById('location').value
+      };
+      
+      const response = await fetch('https://car-rental-website-omega.vercel.app/admin.html', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0'  // Replace with your actual API key
+        },
+        body: JSON.stringify(car)
+      });
+      
+      if (response.ok) {
+        alert('Car added successfully!');
+      } else {
+        alert('Failed to add car.');
+      }
     });
-  
-    if (response.ok) {
-      alert('Car added successfully!');
-    } else {
-      alert('Failed to add car.');
-    }
-  });
-  
   </script>
 </body>
 </html>
