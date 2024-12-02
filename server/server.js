@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config();  // Load environment variables from .env file
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -10,6 +10,8 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
+// Log the MongoDB URI to verify it's loaded correctly
+console.log('MongoDB URI:', process.env.MONGODB_URI);
 
 // Connect to MongoDB using the URI from your .env file
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
