@@ -1,12 +1,13 @@
-// Load cars from JSON and display them
-fetch('./cars.json')
-  .then(response => response.json())
+// Load cars from backend and display them
+fetch('http://localhost:3000/cars')  // Fetch from backend
+  .then(response => response.json())  // Parse the JSON response
   .then(data => {
     const carList = document.getElementById('carList');
     const searchBar = document.getElementById('searchBar');
 
+    // Function to render the cars
     function renderCars(cars) {
-      carList.innerHTML = '';
+      carList.innerHTML = '';  // Clear the current list of cars
       cars.forEach(car => {
         const card = document.createElement('div');
         card.className = 'card';
@@ -20,13 +21,19 @@ fetch('./cars.json')
       });
     }
 
+    // Render the cars once data is fetched
     renderCars(data);
 
+    // Search filter functionality
     searchBar.addEventListener('input', () => {
       const searchQuery = DOMPurify.sanitize(searchBar.value.toLowerCase());
       const filteredCars = data.filter(car => car.name.toLowerCase().includes(searchQuery));
-      renderCars(filteredCars);
+      renderCars(filteredCars);  // Update the car list based on the search query
     });
+  })
+  .catch(error => {
+    console.error('Error fetching cars:', error);
+    alert('Failed to load cars.');
   });
 
 // Book a car
