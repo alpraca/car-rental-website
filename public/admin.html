@@ -24,14 +24,15 @@
         location: document.getElementById('location').value
       };
       
-      const response = await fetch('https://car-rental-website-omega.vercel.app/admin.html', {
+      const response = await fetch('https://https://car-rental-website-omega.vercel.app//add-car', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0'  // Replace with your actual API key
+          'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0',
         },
-        body: JSON.stringify(car)
+        body: JSON.stringify(car),
       });
+      
       
       if (response.ok) {
         alert('Car added successfully!');

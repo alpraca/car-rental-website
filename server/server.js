@@ -1,51 +1,61 @@
-require('dotenv').config();  // Load environment variables from .env file
+require('dotenv').config();
 
 const express = require('express');
-const fs = require('fs');
-const cors = require('cors');  // Make sure you import CORS before using it
+const mongoose = require('mongoose');
+const cors = require('cors');
+
 const app = express();
-app.use(express.json());  // To parse JSON bodies
-app.use(cors());  // Allow cross-origin requests globally
+app.use(express.json());
+app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
-// POST route to add a car
-app.post('/add-car', (req, res) => {
-  const apiKey = req.headers['x-api-key'];
-  console.log('API Key received:', apiKey);
 
-  app.get('/', (req, res) => {
+// Connect to MongoDB using the URI from your .env file
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.log('Error connecting to MongoDB:', err));
+
+// Define a schema and model for cars
+const carSchema = new mongoose.Schema({
+  name: String,
+  price: String,
+  location: String,
+});
+
+const Car = mongoose.model('Car', carSchema, 'cars');
+
+// Routes
+app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-  // Check if API key matches the one stored in environment variables
+// Add a new car
+app.post('/add-car', async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
-    console.log('Unauthorized request');
     return res.status(403).send('Unauthorized');
   }
 
-  const newCar = req.body;
-  console.log('Received new car:', newCar);
+  try {
+    const newCar = new Car(req.body);
+    await newCar.save();
+    res.send('Car added successfully');
+  } catch (error) {
+    console.error('Error adding car:', error);
+    res.status(500).send('Server error');
+  }
+});
 
-  // Use the data folder instead of public for storing cars.json
-  fs.readFile('./data/cars.json', 'utf8', (err, data) => {
-    if (err) {
-      console.log('Error reading cars file:', err);
-      return res.status(500).send('Server error');
-    }
-
-    const cars = JSON.parse(data);
-    cars.push(newCar);
-
-    fs.writeFile('./data/cars.json', JSON.stringify(cars, null, 2), (err) => {
-      if (err) {
-        console.log('Error writing to cars file:', err);
-        return res.status(500).send('Server error');
-      }
-      console.log('Car added successfully');
-      res.send('Car added successfully');
-    });
-  });
+// Get all cars
+app.get('/cars', async (req, res) => {
+  try {
+    const cars = await Car.find();
+    res.json(cars);
+  } catch (error) {
+    console.error('Error fetching cars:', error);
+    res.status(500).send('Server error');
+  }
 });
 
 // Start the server
