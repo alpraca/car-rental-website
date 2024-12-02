@@ -1,4 +1,5 @@
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config();  // Load environment variables from .env file
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -8,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Serve static files from 'public' folder
+// Serve static files (like HTML, CSS, JS) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
@@ -61,6 +62,11 @@ app.get('/cars', async (req, res) => {
     console.error('Error fetching cars:', error);
     res.status(500).send('Server error');
   }
+});
+
+// Serve the admin panel at /admin.html
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Start the server
