@@ -6,7 +6,7 @@
   <title>Admin Panel</title>
 </head>
 <body>
-  <h1>Admin Panel</h1>
+  <h1>Car Rental Dashboard</h1>
   
   <!-- Form for adding a new car -->
   <form id="addCarForm">
@@ -16,8 +16,37 @@
     <button type="submit">Add Car</button>
   </form>
 
+  <h2>Cars List</h2>
+  <ul id="carList">
+    <!-- List of cars will be displayed here -->
+  </ul>
+
   <script>
-    // Event listener for form submission
+    // Function to fetch cars from the server and display them
+    async function fetchCars() {
+      try {
+        const response = await fetch('http://localhost:3000/cars');
+        const cars = await response.json(); // Parse the JSON response
+
+        const carList = document.getElementById('carList');
+        carList.innerHTML = '';  // Clear any existing list
+
+        // Loop through the cars and add them to the list
+        cars.forEach(car => {
+          const li = document.createElement('li');
+          li.textContent = `Name: ${car.name}, Price: ${car.price}, Location: ${car.location}`;
+          carList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error fetching cars:', error);
+        alert('Failed to fetch cars');
+      }
+    }
+
+    // Call fetchCars on page load to display cars
+    fetchCars();
+
+    // Event listener for form submission to add a car
     document.getElementById('addCarForm').addEventListener('submit', async (e) => {
       e.preventDefault(); // Prevent the default form submission behavior
 
@@ -39,15 +68,14 @@
           body: JSON.stringify(car) // Convert the car object to a JSON string
         });
 
-        // Check if the car was added successfully
         if (response.ok) {
           alert('Car added successfully!'); // Show success message
+          fetchCars(); // Fetch and display the updated list of cars
           document.getElementById('addCarForm').reset(); // Reset the form
         } else {
-          alert('Failed to add car.'); // Show error message
+          alert('Failed to add car.');
         }
       } catch (error) {
-        // If there's an error with the fetch request
         console.error('Error:', error);
         alert('Error occurred while adding the car.');
       }

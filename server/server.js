@@ -55,15 +55,17 @@ app.post('/add-car', async (req, res) => {
 });
 
 // Get all cars via GET
+// Get all cars
 app.get('/cars', async (req, res) => {
   try {
-    const cars = await Car.find(); // Get all cars from the database
-    res.json(cars);
+    const cars = await Car.find();  // Fetch all cars from the database
+    res.json(cars);  // Send the cars as a JSON response
   } catch (error) {
     console.error('Error fetching cars:', error);
     res.status(500).send('Server error');
   }
 });
+
 
 // Serve the admin panel at /admin.html
 app.get('/admin.html', (req, res) => {
