@@ -7,37 +7,49 @@
 </head>
 <body>
   <h1>Admin Panel</h1>
+  
+  <!-- Form for adding a new car -->
   <form id="addCarForm">
     <input type="text" id="name" placeholder="Car Name" required>
     <input type="text" id="price" placeholder="Car Price" required>
     <input type="text" id="location" placeholder="Car Location" required>
     <button type="submit">Add Car</button>
   </form>
-  
+
   <script>
+    // Event listener for form submission
     document.getElementById('addCarForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
+      e.preventDefault(); // Prevent the default form submission behavior
+
+      // Collect the form data to create a new car object
       const car = {
         name: document.getElementById('name').value,
         price: document.getElementById('price').value,
         location: document.getElementById('location').value
       };
-      
-      const response = await fetch('https://car-rental-website-omega.vercel.app//add-car', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0',
-        },
-        body: JSON.stringify(car),
-      });
-      
-      
-      if (response.ok) {
-        alert('Car added successfully!');
-      } else {
-        alert('Failed to add car.');
+
+      try {
+        // Sending the car data via a POST request to the backend
+        const response = await fetch('http://localhost:3000/add-car', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', // Telling the server we are sending JSON data
+            'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0' // API key for authorization
+          },
+          body: JSON.stringify(car) // Convert the car object to a JSON string
+        });
+
+        // Check if the car was added successfully
+        if (response.ok) {
+          alert('Car added successfully!'); // Show success message
+          document.getElementById('addCarForm').reset(); // Reset the form
+        } else {
+          alert('Failed to add car.'); // Show error message
+        }
+      } catch (error) {
+        // If there's an error with the fetch request
+        console.error('Error:', error);
+        alert('Error occurred while adding the car.');
       }
     });
   </script>
