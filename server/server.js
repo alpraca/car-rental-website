@@ -6,8 +6,8 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+app.use(express.json()); // To parse incoming JSON requests
+app.use(cors()); // Enable CORS for all routes
 
 // Serve static files (like HTML, CSS, JS) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,13 +22,14 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.log('Error connecting to MongoDB:', err));
 
-// Define a schema and model for cars
+// Define a schema for the car
 const carSchema = new mongoose.Schema({
   name: String,
   price: String,
   location: String,
 });
 
+// Create a model for the car using the schema
 const Car = mongoose.model('Car', carSchema, 'cars');
 
 // Routes
@@ -36,7 +37,7 @@ app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-// Add a new car
+// Add a new car via POST
 app.post('/add-car', async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
@@ -45,7 +46,7 @@ app.post('/add-car', async (req, res) => {
 
   try {
     const newCar = new Car(req.body);
-    await newCar.save();
+    await newCar.save(); // Save the new car to the database
     res.send('Car added successfully');
   } catch (error) {
     console.error('Error adding car:', error);
@@ -53,10 +54,10 @@ app.post('/add-car', async (req, res) => {
   }
 });
 
-// Get all cars
+// Get all cars via GET
 app.get('/cars', async (req, res) => {
   try {
-    const cars = await Car.find();
+    const cars = await Car.find(); // Get all cars from the database
     res.json(cars);
   } catch (error) {
     console.error('Error fetching cars:', error);
