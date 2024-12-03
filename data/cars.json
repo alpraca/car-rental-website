@@ -1,8 +1,0 @@
-[
-    { "name": "Toyota Corolla", "price": "$30/day", "location": "New York" },
-    { "name": "Ford Mustang", "price": "$50/day", "location": "Los Angeles" },
-    { "name": "Honda Civic", "price": "$25/day", "location": "Chicago" },
-    { "name": "Tesla Model 3", "price": "$70/day", "location": "San Francisco" },
-    { "name": "Chevrolet Malibu", "price": "$40/day", "location": "Houston" }
-  ]
-  
