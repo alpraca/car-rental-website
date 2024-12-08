@@ -17,22 +17,22 @@ if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS || !process.env.MONGODB_U
   process.exit(1);
 }
 
-// Authentication middleware setup for multiple pages
+// Authentication middleware setup for multiple pages (admin)
 const authMiddleware = basicAuth({
   users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
-  challenge: true,
-  unauthorizedResponse: 'Unauthorized Access'
+  challenge: true, // Enable challenge (pop-up)
+  unauthorizedResponse: 'Unauthorized Access' // Custom message for unauthorized access
 });
-
-// Apply authentication to the required pages
-app.use('/admin.html', authMiddleware);
-app.use('/settings.html', authMiddleware);
-app.use('/dashboard.html', authMiddleware);
 
 // Serve static files (public folder)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set up Multer for file upload
+// Routes to serve protected admin-related pages
+app.use('/admin.html', authMiddleware);
+app.use('/settings.html', authMiddleware);
+app.use('/dashboard.html', authMiddleware);
+
+// File upload setup with Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = 'public/uploads/';
@@ -43,7 +43,7 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
   }
 });
 
@@ -67,12 +67,12 @@ const carSchema = new mongoose.Schema({
 
 const Car = mongoose.model('Car', carSchema, 'cars');
 
-// Test route to check server status
+// Routes to check server status and interact with cars
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-// Route to add a car (only for authorized API requests)
+// Route to add a car (admin only)
 app.post('/add-car', upload.array('images', 10), async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
@@ -123,19 +123,6 @@ app.delete('/delete-car/:id', async (req, res) => {
     console.error('Error deleting car:', error);
     res.status(500).send('Server error');
   }
-});
-
-// Routes to serve protected admin-related pages
-app.get('/admin.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/settings.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'settings.html'));
-});
-
-app.get('/dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Start the server
