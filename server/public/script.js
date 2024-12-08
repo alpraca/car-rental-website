@@ -18,8 +18,13 @@ fetch('http://localhost:3000/cars')  // Fetch from backend
           <div class="image-gallery">
             ${car.images.map(img => `<img src="${img}" width="100" height="100" onclick="viewImage('${img}')">`).join('')}
           </div>
-          <button onclick="deleteCar('${car._id}')">Delete Car</button>
         `;
+        
+        // Check if the user is an admin by checking the URL (admin page will show delete buttons)
+        if (window.location.pathname.includes('admin.html')) { // Check if on the admin page
+          card.innerHTML += `<button onclick="deleteCar('${car._id}')">Delete Car</button>`;
+        }
+        
         carList.appendChild(card);
       });
     }
@@ -42,7 +47,7 @@ function viewImage(imageUrl) {
   window.open(imageUrl, '_blank');
 }
 
-// Function to delete a car
+// Function to delete a car (called from the admin panel only)
 function deleteCar(carId) {
   const apiKey = 'd3c661fb937d9a1fd4a31ec6f3b48aa0';  // Your API key
   fetch(`http://localhost:3000/delete-car/${carId}`, {
