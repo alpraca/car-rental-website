@@ -7,7 +7,7 @@
 </head>
 <body>
   <h1>Car Rental Dashboard</h1>
-  
+
   <!-- Form for adding a new car -->
   <form id="addCarForm" enctype="multipart/form-data">
     <input type="text" id="name" placeholder="Car Name" required>
@@ -27,10 +27,12 @@
     async function fetchCars() {
       try {
         const response = await fetch('http://localhost:3000/cars');
-        const cars = await response.json();
+        
+        // The server will prompt for authentication if needed
+        const cars = await response.json(); // Parse the JSON response
 
         const carList = document.getElementById('carList');
-        carList.innerHTML = '';
+        carList.innerHTML = '';  // Clear any existing list
 
         // Loop through the cars and add them to the list
         cars.forEach(car => {
@@ -54,7 +56,7 @@
 
     // Event listener for form submission to add a car
     document.getElementById('addCarForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+      e.preventDefault(); // Prevent the default form submission behavior
 
       const formData = new FormData();
       formData.append('name', document.getElementById('name').value);
@@ -67,18 +69,19 @@
       }
 
       try {
+        // Sending the car data via a POST request to the backend
         const response = await fetch('http://localhost:3000/add-car', {
           method: 'POST',
           headers: {
-            'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0'
+            'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0' // API key for authorization
           },
-          body: formData
+          body: formData // Send form data (including images)
         });
 
         if (response.ok) {
-          alert('Car added successfully!');
-          fetchCars();
-          document.getElementById('addCarForm').reset();
+          alert('Car added successfully!'); // Show success message
+          fetchCars(); // Fetch and display the updated list of cars
+          document.getElementById('addCarForm').reset(); // Reset the form
         } else {
           alert('Failed to add car.');
         }
@@ -88,7 +91,7 @@
       }
     });
 
-    // Function to delete a car (only available in the admin panel)
+    // Function to delete a car
     async function deleteCar(carId) {
       try {
         const response = await fetch(`http://localhost:3000/delete-car/${carId}`, {
@@ -97,7 +100,7 @@
 
         if (response.ok) {
           alert('Car deleted successfully!');
-          fetchCars();
+          fetchCars();  // Refresh the car list
         } else {
           alert('Failed to delete car.');
         }

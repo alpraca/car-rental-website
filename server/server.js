@@ -1,4 +1,4 @@
-require('dotenv').config(); // Ensures environment variables are loaded
+require('dotenv').config(); // Ensure environment variables are loaded
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -17,20 +17,25 @@ if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS || !process.env.MONGODB_U
   process.exit(1);
 }
 
-// Authentication middleware setup for multiple pages (admin)
-const authMiddleware = basicAuth({
+// Authentication middleware setup for admin pages
+const authenticate = basicAuth({
   users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
   challenge: true, // Enable challenge (pop-up)
   unauthorizedResponse: 'Unauthorized Access' // Custom message for unauthorized access
 });
 
+// Serve the admin page with authentication
+app.use('/admin.html', authenticate, (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
 // Serve static files (public folder)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes to serve protected admin-related pages
-app.use('/admin.html', authMiddleware);
-app.use('/settings.html', authMiddleware);
-app.use('/dashboard.html', authMiddleware);
+// Routes to check server status and interact with cars
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
 
 // File upload setup with Multer
 const storage = multer.diskStorage({
@@ -43,7 +48,7 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
@@ -67,12 +72,7 @@ const carSchema = new mongoose.Schema({
 
 const Car = mongoose.model('Car', carSchema, 'cars');
 
-// Routes to check server status and interact with cars
-app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
-
-// Route to add a car (admin only)
+// Route to add a car
 app.post('/add-car', upload.array('images', 10), async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
