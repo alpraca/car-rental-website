@@ -15,29 +15,28 @@ fetch('http://localhost:3000/cars')  // Fetch from backend
           <h3>${DOMPurify.sanitize(car.name)}</h3>
           <p>Price: ${DOMPurify.sanitize(car.price)}</p>
           <p>Location: ${DOMPurify.sanitize(car.location)}</p>
-          <button onclick="bookCar('${DOMPurify.sanitize(car.name)}')">Book Now</button>
+          <div class="image-gallery">
+            ${car.images.map(img => `<img src="${img}" width="100" height="100" onclick="viewImage('${img}')">`).join('')}
+          </div>
         `;
         carList.appendChild(card);
       });
     }
 
-    // Render the cars once data is fetched
     renderCars(data);
 
-    // Search filter functionality
-    searchBar.addEventListener('input', () => {
-      const searchQuery = DOMPurify.sanitize(searchBar.value.toLowerCase());
-      const filteredCars = data.filter(car => car.name.toLowerCase().includes(searchQuery));
-      renderCars(filteredCars);  // Update the car list based on the search query
+    // Event listener for search bar to filter cars based on name
+    searchBar.addEventListener('input', function () {
+      const filteredCars = data.filter(car => car.name.toLowerCase().includes(searchBar.value.toLowerCase()));
+      renderCars(filteredCars);
     });
   })
   .catch(error => {
     console.error('Error fetching cars:', error);
-    alert('Failed to load cars.');
+    alert('Failed to load cars');
   });
 
-// Book a car
-function bookCar(carName) {
-  alert(`Booking request sent for ${carName}.`);
-  // Replace with EmailJS or backend API call for booking notifications
+// Function to view images in a larger view
+function viewImage(imageUrl) {
+  window.open(imageUrl, '_blank');
 }

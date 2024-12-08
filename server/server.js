@@ -1,10 +1,10 @@
 require('dotenv').config();  // Load environment variables from .env file
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const basicAuth = require('express-basic-auth'); // Add this for basic authentication
+const multer = require('multer');  // Import multer for file uploads
 
 const app = express();
 app.use(express.json()); // To parse incoming JSON requests
@@ -20,24 +20,31 @@ app.use('/admin.html', basicAuth({
 // Serve static files (like HTML, CSS, JS) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-const PORT = process.env.PORT || 3000;
+// Set up multer storage for car images
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // Generate unique file name
+  }
+});
 
-// Log the MongoDB URI to verify it's loaded correctly
-console.log('MongoDB URI:', process.env.MONGODB_URI);
+const upload = multer({ storage: storage });
 
-// Connect to MongoDB using the URI from your .env file
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.log('Error connecting to MongoDB:', err));
 
-// Define a schema for the car
+// Define a schema for the car with an array of image URLs
 const carSchema = new mongoose.Schema({
   name: String,
   price: String,
   location: String,
+  images: [String]  // Array of image URLs
 });
 
-// Create a model for the car using the schema
 const Car = mongoose.model('Car', carSchema, 'cars');
 
 // Routes
@@ -45,16 +52,24 @@ app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-// Add a new car via POST
-app.post('/add-car', async (req, res) => {
+// Add a new car with images via POST
+app.post('/add-car', upload.array('images', 10), async (req, res) => {  // Allow up to 10 images
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
     return res.status(403).send('Unauthorized');
   }
 
   try {
-    const newCar = new Car(req.body);
-    await newCar.save(); // Save the new car to the database
+    const imageUrls = req.files.map(file => '/uploads/' + file.filename);  // Store file paths
+
+    const newCar = new Car({
+      name: req.body.name,
+      price: req.body.price,
+      location: req.body.location,
+      images: imageUrls  // Save image URLs
+    });
+
+    await newCar.save();
     res.send('Car added successfully');
   } catch (error) {
     console.error('Error adding car:', error);
@@ -62,12 +77,11 @@ app.post('/add-car', async (req, res) => {
   }
 });
 
-// Get all cars via GET
-// Get all cars
+// Get all cars with images
 app.get('/cars', async (req, res) => {
   try {
-    const cars = await Car.find();  // Fetch all cars from the database
-    res.json(cars);  // Send the cars as a JSON response
+    const cars = await Car.find();
+    res.json(cars);
   } catch (error) {
     console.error('Error fetching cars:', error);
     res.status(500).send('Server error');
@@ -80,6 +94,7 @@ app.get('/admin.html', (req, res) => {
 });
 
 // Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
