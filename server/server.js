@@ -4,10 +4,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const basicAuth = require('express-basic-auth'); // Add this for basic authentication
 
 const app = express();
 app.use(express.json()); // To parse incoming JSON requests
 app.use(cors()); // Enable CORS for all routes
+
+// Basic Authentication Middleware for Admin Routes
+app.use('/admin.html', basicAuth({
+  users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS }, // Username and password from .env
+  challenge: true,  // This ensures that the browser will show a login prompt
+  unauthorizedResponse: 'Unauthorized Access'  // Custom unauthorized message
+}));
 
 // Serve static files (like HTML, CSS, JS) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -65,7 +73,6 @@ app.get('/cars', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 
 // Serve the admin panel at /admin.html
 app.get('/admin.html', (req, res) => {
