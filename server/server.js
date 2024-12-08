@@ -1,59 +1,52 @@
-require('dotenv').config();  // Load environment variables from .env file
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const basicAuth = require('express-basic-auth');
-const multer = require('multer');  // Import multer for file uploads
+const multer = require('multer');
 const fs = require('fs');
 
 const app = express();
-app.use(express.json()); // To parse incoming JSON requests
-app.use(cors()); // Enable CORS for all routes
+app.use(express.json());
+app.use(cors());
 
-// Basic Authentication Middleware for Admin Routes
 app.use('/admin.html', basicAuth({
-  users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS }, // Username and password from .env
-  challenge: true,  // This ensures that the browser will show a login prompt
-  unauthorizedResponse: 'Unauthorized Access'  // Custom unauthorized message
+  users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
+  challenge: true,
+  unauthorizedResponse: 'Unauthorized Access'
 }));
 
-// Serve static files (like HTML, CSS, JS) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set up multer storage for car images
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Generate unique file name
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
 const upload = multer({ storage: storage });
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.log('Error connecting to MongoDB:', err));
 
-// Define a schema for the car with an array of image URLs
 const carSchema = new mongoose.Schema({
   name: String,
   price: String,
   location: String,
-  images: [String]  // Array of image URLs
+  images: [String]
 });
 
 const Car = mongoose.model('Car', carSchema, 'cars');
 
-// Routes
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-// Add a new car with images via POST
 app.post('/add-car', upload.array('images', 10), async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
@@ -61,13 +54,13 @@ app.post('/add-car', upload.array('images', 10), async (req, res) => {
   }
 
   try {
-    const imageUrls = req.files.map(file => '/uploads/' + file.filename);  // Store file paths
+    const imageUrls = req.files.map(file => '/uploads/' + file.filename);
 
     const newCar = new Car({
       name: req.body.name,
       price: req.body.price,
       location: req.body.location,
-      images: imageUrls  // Save image URLs
+      images: imageUrls
     });
 
     await newCar.save();
@@ -78,7 +71,6 @@ app.post('/add-car', upload.array('images', 10), async (req, res) => {
   }
 });
 
-// Get all cars with images
 app.get('/cars', async (req, res) => {
   try {
     const cars = await Car.find();
@@ -97,14 +89,11 @@ app.delete('/delete-car/:id', basicAuth({
 }), async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
-
-    // Delete images from server
     car.images.forEach(image => {
       const imagePath = path.join(__dirname, 'public', image);
       fs.unlinkSync(imagePath);
     });
 
-    // Delete the car from the database
     await Car.findByIdAndDelete(req.params.id);
     res.send('Car deleted successfully');
   } catch (error) {
@@ -113,12 +102,10 @@ app.delete('/delete-car/:id', basicAuth({
   }
 });
 
-// Serve the admin panel at /admin.html
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

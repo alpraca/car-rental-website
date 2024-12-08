@@ -27,10 +27,10 @@
     async function fetchCars() {
       try {
         const response = await fetch('http://localhost:3000/cars');
-        const cars = await response.json(); // Parse the JSON response
+        const cars = await response.json();
 
         const carList = document.getElementById('carList');
-        carList.innerHTML = '';  // Clear any existing list
+        carList.innerHTML = '';
 
         // Loop through the cars and add them to the list
         cars.forEach(car => {
@@ -54,7 +54,7 @@
 
     // Event listener for form submission to add a car
     document.getElementById('addCarForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); // Prevent the default form submission behavior
+      e.preventDefault();
 
       const formData = new FormData();
       formData.append('name', document.getElementById('name').value);
@@ -67,19 +67,18 @@
       }
 
       try {
-        // Sending the car data via a POST request to the backend
         const response = await fetch('http://localhost:3000/add-car', {
           method: 'POST',
           headers: {
-            'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0' // API key for authorization
+            'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0'
           },
-          body: formData // Send form data (including images)
+          body: formData
         });
 
         if (response.ok) {
-          alert('Car added successfully!'); // Show success message
-          fetchCars(); // Fetch and display the updated list of cars
-          document.getElementById('addCarForm').reset(); // Reset the form
+          alert('Car added successfully!');
+          fetchCars();
+          document.getElementById('addCarForm').reset();
         } else {
           alert('Failed to add car.');
         }
@@ -89,7 +88,7 @@
       }
     });
 
-    // Function to delete a car
+    // Function to delete a car (only available in the admin panel)
     async function deleteCar(carId) {
       try {
         const response = await fetch(`http://localhost:3000/delete-car/${carId}`, {
@@ -98,7 +97,7 @@
 
         if (response.ok) {
           alert('Car deleted successfully!');
-          fetchCars();  // Refresh the car list
+          fetchCars();
         } else {
           alert('Failed to delete car.');
         }
