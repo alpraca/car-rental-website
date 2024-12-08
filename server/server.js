@@ -3,9 +3,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const basicAuth = require('express-basic-auth'); // Add this for basic authentication
+const basicAuth = require('express-basic-auth');
 const multer = require('multer');  // Import multer for file uploads
-const fs = require('fs'); // To handle file deletions
+const fs = require('fs');
 
 const app = express();
 app.use(express.json()); // To parse incoming JSON requests
@@ -91,24 +91,17 @@ app.get('/cars', async (req, res) => {
 
 // Delete a car by ID
 app.delete('/delete-car/:id', async (req, res) => {
-  const carId = req.params.id;
-
   try {
-    const car = await Car.findByIdAndDelete(carId);
-    if (!car) {
-      return res.status(404).send('Car not found');
-    }
+    const car = await Car.findById(req.params.id);
 
-    // Delete the images from the server
-    car.images.forEach(imagePath => {
-      const imagePathToDelete = path.join(__dirname, 'public', imagePath);
-      fs.unlink(imagePathToDelete, (err) => {
-        if (err) {
-          console.error('Error deleting image:', err);
-        }
-      });
+    // Delete images from server
+    car.images.forEach(image => {
+      const imagePath = path.join(__dirname, 'public', image);
+      fs.unlinkSync(imagePath);
     });
 
+    // Delete the car from the database
+    await Car.findByIdAndDelete(req.params.id);
     res.send('Car deleted successfully');
   } catch (error) {
     console.error('Error deleting car:', error);
