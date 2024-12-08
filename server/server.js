@@ -89,8 +89,12 @@ app.get('/cars', async (req, res) => {
   }
 });
 
-// Delete a car by ID
-app.delete('/delete-car/:id', async (req, res) => {
+// DELETE route for admin to delete a car by ID
+app.delete('/delete-car/:id', basicAuth({
+  users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
+  challenge: true,
+  unauthorizedResponse: 'Unauthorized Access'
+}), async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
 
