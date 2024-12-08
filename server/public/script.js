@@ -18,6 +18,7 @@ fetch('http://localhost:3000/cars')  // Fetch from backend
           <div class="image-gallery">
             ${car.images.map(img => `<img src="${img}" width="100" height="100" onclick="viewImage('${img}')">`).join('')}
           </div>
+          <button onclick="deleteCar('${car._id}')">Delete Car</button>
         `;
         carList.appendChild(card);
       });
@@ -39,4 +40,27 @@ fetch('http://localhost:3000/cars')  // Fetch from backend
 // Function to view images in a larger view
 function viewImage(imageUrl) {
   window.open(imageUrl, '_blank');
+}
+
+// Function to delete a car
+function deleteCar(carId) {
+  const apiKey = 'd3c661fb937d9a1fd4a31ec6f3b48aa0';  // Your API key
+  fetch(`http://localhost:3000/delete-car/${carId}`, {
+    method: 'DELETE',
+    headers: {
+      'x-api-key': apiKey
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      alert('Car deleted successfully!');
+      location.reload();  // Reload the page to update the car list
+    } else {
+      alert('Failed to delete car');
+    }
+  })
+  .catch(error => {
+    console.error('Error deleting car:', error);
+    alert('Error occurred while deleting the car');
+  });
 }

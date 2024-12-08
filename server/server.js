@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const basicAuth = require('express-basic-auth'); // Add this for basic authentication
 const multer = require('multer');  // Import multer for file uploads
+const fs = require('fs'); // To handle file deletions
 
 const app = express();
 app.use(express.json()); // To parse incoming JSON requests
@@ -53,7 +54,7 @@ app.get('/', (req, res) => {
 });
 
 // Add a new car with images via POST
-app.post('/add-car', upload.array('images', 10), async (req, res) => {  // Allow up to 10 images
+app.post('/add-car', upload.array('images', 10), async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
     return res.status(403).send('Unauthorized');
@@ -84,6 +85,33 @@ app.get('/cars', async (req, res) => {
     res.json(cars);
   } catch (error) {
     console.error('Error fetching cars:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Delete a car by ID
+app.delete('/delete-car/:id', async (req, res) => {
+  const carId = req.params.id;
+
+  try {
+    const car = await Car.findByIdAndDelete(carId);
+    if (!car) {
+      return res.status(404).send('Car not found');
+    }
+
+    // Delete the images from the server
+    car.images.forEach(imagePath => {
+      const imagePathToDelete = path.join(__dirname, 'public', imagePath);
+      fs.unlink(imagePathToDelete, (err) => {
+        if (err) {
+          console.error('Error deleting image:', err);
+        }
+      });
+    });
+
+    res.send('Car deleted successfully');
+  } catch (error) {
+    console.error('Error deleting car:', error);
     res.status(500).send('Server error');
   }
 });
