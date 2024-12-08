@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); // Ensures environment variables are loaded
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,17 +11,36 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/admin.html', basicAuth({
+// Validate required environment variables
+if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS || !process.env.MONGODB_URI || !process.env.API_KEY) {
+  console.error('Missing required environment variables');
+  process.exit(1);
+}
+
+// Authentication middleware setup for multiple pages
+const authMiddleware = basicAuth({
   users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
   challenge: true,
   unauthorizedResponse: 'Unauthorized Access'
-}));
+});
 
+// Apply authentication to the required pages
+app.use('/admin.html', authMiddleware);
+app.use('/settings.html', authMiddleware);
+app.use('/dashboard.html', authMiddleware);
+
+// Serve static files (public folder)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Set up Multer for file upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads/');
+    const uploadDir = 'public/uploads/';
+    // Ensure the upload directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -30,10 +49,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.log('Error connecting to MongoDB:', err));
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1); // Exit if database connection fails
+  });
 
+// Car schema and model
 const carSchema = new mongoose.Schema({
   name: String,
   price: String,
@@ -43,10 +67,12 @@ const carSchema = new mongoose.Schema({
 
 const Car = mongoose.model('Car', carSchema, 'cars');
 
+// Test route to check server status
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
+// Route to add a car (only for authorized API requests)
 app.post('/add-car', upload.array('images', 10), async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
@@ -71,6 +97,7 @@ app.post('/add-car', upload.array('images', 10), async (req, res) => {
   }
 });
 
+// Route to fetch all cars
 app.get('/cars', async (req, res) => {
   try {
     const cars = await Car.find();
@@ -81,20 +108,16 @@ app.get('/cars', async (req, res) => {
   }
 });
 
-// DELETE route for admin to delete a car by ID
-app.delete('/delete-car/:id', basicAuth({
-  users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
-  challenge: true,
-  unauthorizedResponse: 'Unauthorized Access'
-}), async (req, res) => {
+// Route to delete a car (admin only)
+app.delete('/delete-car/:id', async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
     car.images.forEach(image => {
       const imagePath = path.join(__dirname, 'public', image);
-      fs.unlinkSync(imagePath);
+      fs.unlinkSync(imagePath); // Delete the image files
     });
 
-    await Car.findByIdAndDelete(req.params.id);
+    await Car.findByIdAndDelete(req.params.id); // Delete car record from database
     res.send('Car deleted successfully');
   } catch (error) {
     console.error('Error deleting car:', error);
@@ -102,10 +125,20 @@ app.delete('/delete-car/:id', basicAuth({
   }
 });
 
+// Routes to serve protected admin-related pages
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+app.get('/settings.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'settings.html'));
+});
+
+app.get('/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
