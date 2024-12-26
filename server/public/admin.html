@@ -4,45 +4,92 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
+  <style>
+    img {
+      margin: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    img:hover {
+      border-color: #777;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <h1>Car Rental Dashboard</h1>
 
-  <!-- Form for adding a new car -->
-  <form id="addCarForm" enctype="multipart/form-data">
-    <input type="text" id="name" placeholder="Car Name" required>
-    <input type="text" id="price" placeholder="Car Price" required>
-    <input type="text" id="location" placeholder="Car Location" required>
-    <input type="file" id="images" name="images" multiple required>
-    <button type="submit">Add Car</button>
-  </form>
+  <!-- Login form -->
+  <div id="loginForm">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+  </div>
 
-  <h2>Cars List</h2>
-  <ul id="carList">
-    <!-- List of cars will be displayed here -->
-  </ul>
+  <!-- Admin panel -->
+  <div id="adminPanel" style="display: none;">
+    <h2>Add a Car</h2>
+    <form id="addCarForm" enctype="multipart/form-data">
+      <input type="text" id="name" placeholder="Car Name" required>
+      <input type="text" id="price" placeholder="Car Price" required>
+      <input type="text" id="location" placeholder="Car Location" required>
+      <input type="file" id="images" name="images" multiple required>
+      <button type="submit">Add Car</button>
+    </form>
+
+    <h2>Cars List</h2>
+    <ul id="carList"></ul>
+  </div>
 
   <script>
-    // Function to fetch cars from the server and display them
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('loginForm').style.display = 'none';
+          document.getElementById('adminPanel').style.display = 'block';
+          fetchCars();
+        } else {
+          alert(data.message || 'Invalid username or password!');
+        }
+      } catch (error) {
+        console.error('Error logging in:', error);
+      }
+    }
+
     async function fetchCars() {
       try {
-        const response = await fetch('http://localhost:3000/cars');
-        
-        // The server will prompt for authentication if needed
-        const cars = await response.json(); // Parse the JSON response
+        const response = await fetch('/cars');
+        const cars = await response.json();
 
         const carList = document.getElementById('carList');
-        carList.innerHTML = '';  // Clear any existing list
+        carList.innerHTML = '';
 
-        // Loop through the cars and add them to the list
-        cars.forEach(car => {
+        cars.forEach((car) => {
           const li = document.createElement('li');
-          li.innerHTML = `
+          li.innerHTML = `  
             <h3>${car.name}</h3>
             <p>Price: ${car.price}</p>
             <p>Location: ${car.location}</p>
             <div>
-              ${car.images.map(img => `<img src="${img}" width="100" height="100" onclick="viewImage('${img}')">`).join('')}
+              ${car.images.map((img) => `<img src="${img}" width="100" height="100">`).join('')}
             </div>
             <button onclick="deleteCar('${car._id}')">Delete</button>
           `;
@@ -50,72 +97,22 @@
         });
       } catch (error) {
         console.error('Error fetching cars:', error);
-        alert('Failed to fetch cars');
       }
     }
 
-    // Event listener for form submission to add a car
-    document.getElementById('addCarForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); // Prevent the default form submission behavior
-
-      const formData = new FormData();
-      formData.append('name', document.getElementById('name').value);
-      formData.append('price', document.getElementById('price').value);
-      formData.append('location', document.getElementById('location').value);
-
-      const images = document.getElementById('images').files;
-      for (let i = 0; i < images.length; i++) {
-        formData.append('images', images[i]);
-      }
-
-      try {
-        // Sending the car data via a POST request to the backend
-        const response = await fetch('http://localhost:3000/add-car', {
-          method: 'POST',
-          headers: {
-            'x-api-key': 'd3c661fb937d9a1fd4a31ec6f3b48aa0' // API key for authorization
-          },
-          body: formData // Send form data (including images)
-        });
-
-        if (response.ok) {
-          alert('Car added successfully!'); // Show success message
-          fetchCars(); // Fetch and display the updated list of cars
-          document.getElementById('addCarForm').reset(); // Reset the form
-        } else {
-          alert('Failed to add car.');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error occurred while adding the car.');
-      }
-    });
-
-    // Function to delete a car
     async function deleteCar(carId) {
       try {
-        const response = await fetch(`http://localhost:3000/delete-car/${carId}`, {
-          method: 'DELETE',
-        });
+        const response = await fetch(`/delete-car/${carId}`, { method: 'DELETE' });
 
         if (response.ok) {
           alert('Car deleted successfully!');
-          fetchCars();  // Refresh the car list
+          fetchCars();
         } else {
           alert('Failed to delete car.');
         }
       } catch (error) {
-        console.error('Error:', error);
-        alert('Error occurred while deleting the car.');
+        console.error('Error deleting car:', error);
       }
-    }
-
-    // Call fetchCars on page load to display cars
-    fetchCars();
-
-    // Function to view images in a larger view
-    function viewImage(imageUrl) {
-      window.open(imageUrl, '_blank');
     }
   </script>
 </body>

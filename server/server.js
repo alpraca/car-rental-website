@@ -1,9 +1,8 @@
-require('dotenv').config(); // Ensure environment variables are loaded
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const basicAuth = require('express-basic-auth');
 const multer = require('multer');
 const fs = require('fs');
 
@@ -11,68 +10,51 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Validate required environment variables
-if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS || !process.env.MONGODB_URI || !process.env.API_KEY) {
-  console.error('Missing required environment variables');
-  process.exit(1);
-}
-
-// Authentication middleware setup for admin pages
-const authenticate = basicAuth({
-  users: { [process.env.ADMIN_USER]: process.env.ADMIN_PASS },
-  challenge: true, // Enable challenge (pop-up)
-  unauthorizedResponse: 'Unauthorized Access' // Custom message for unauthorized access
-});
-
-// Serve the admin page with authentication
-app.use('/admin.html', authenticate, (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-// Serve static files (public folder)
+// Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes to check server status and interact with cars
-app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
-
-// File upload setup with Multer
+// Configure file upload with multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'public/uploads/';
-    // Ensure the upload directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    const uploadPath = path.join(__dirname, 'public/uploads');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
     }
-    cb(null, uploadDir);
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
-  }
+  },
 });
-
 const upload = multer({ storage: storage });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => {
-    console.error('Error connecting to MongoDB:', err);
-    process.exit(1); // Exit if database connection fails
-  });
+  .catch((err) => console.log('Error connecting to MongoDB:', err));
 
 // Car schema and model
 const carSchema = new mongoose.Schema({
   name: String,
   price: String,
   location: String,
-  images: [String]
+  images: [String],
 });
-
 const Car = mongoose.model('Car', carSchema, 'cars');
 
-// Route to add a car
+// Authentication middleware
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+    res.status(200).send({ message: 'Login successful' });
+  } else {
+    res.status(403).send({ message: 'Invalid username or password' });
+  }
+});
+
+// Add a car
 app.post('/add-car', upload.array('images', 10), async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.API_KEY) {
@@ -80,13 +62,13 @@ app.post('/add-car', upload.array('images', 10), async (req, res) => {
   }
 
   try {
-    const imageUrls = req.files.map(file => '/uploads/' + file.filename);
+    const imageUrls = req.files.map((file) => '/uploads/' + file.filename);
 
     const newCar = new Car({
       name: req.body.name,
       price: req.body.price,
       location: req.body.location,
-      images: imageUrls
+      images: imageUrls,
     });
 
     await newCar.save();
@@ -97,7 +79,7 @@ app.post('/add-car', upload.array('images', 10), async (req, res) => {
   }
 });
 
-// Route to fetch all cars
+// Fetch all cars
 app.get('/cars', async (req, res) => {
   try {
     const cars = await Car.find();
@@ -108,16 +90,20 @@ app.get('/cars', async (req, res) => {
   }
 });
 
-// Route to delete a car (admin only)
+// Delete a car
 app.delete('/delete-car/:id', async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
-    car.images.forEach(image => {
-      const imagePath = path.join(__dirname, 'public', image);
-      fs.unlinkSync(imagePath); // Delete the image files
-    });
+    if (car.images) {
+      car.images.forEach((image) => {
+        const imagePath = path.join(__dirname, 'public', image);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      });
+    }
 
-    await Car.findByIdAndDelete(req.params.id); // Delete car record from database
+    await Car.findByIdAndDelete(req.params.id);
     res.send('Car deleted successfully');
   } catch (error) {
     console.error('Error deleting car:', error);
