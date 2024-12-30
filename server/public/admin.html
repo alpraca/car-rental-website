@@ -20,6 +20,14 @@
     li {
       margin-bottom: 20px;
     }
+    .card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .image-gallery img {
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -27,7 +35,7 @@
 
   <!-- Login form -->
   <div id="loginForm">
-    <h2>Login</h2>
+    <h2>Admin Login</h2>
     <input type="text" id="username" placeholder="Username" required>
     <input type="password" id="password" placeholder="Password" required>
     <button onclick="login()">Login</button>
@@ -36,84 +44,22 @@
   <!-- Admin panel -->
   <div id="adminPanel" style="display: none;">
     <h2>Add a Car</h2>
-    <form id="addCarForm" enctype="multipart/form-data">
+    <form id="addCarForm">
       <input type="text" id="name" placeholder="Car Name" required>
       <input type="text" id="price" placeholder="Car Price" required>
       <input type="text" id="location" placeholder="Car Location" required>
       <input type="file" id="images" name="images" multiple required>
-      <button type="submit">Add Car</button>
+      <button type="button" onclick="addCar()">Add Car</button>
     </form>
+
+    <h2>Search Cars</h2>
+    <input type="text" id="searchBar" placeholder="Search by Serial Code, Name, etc.">
+    <button onclick="searchCars()">Search</button>
 
     <h2>Cars List</h2>
     <ul id="carList"></ul>
   </div>
 
-  <script>
-    async function login() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      try {
-        const response = await fetch('/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          document.getElementById('loginForm').style.display = 'none';
-          document.getElementById('adminPanel').style.display = 'block';
-          fetchCars();
-        } else {
-          alert(data.message || 'Invalid username or password!');
-        }
-      } catch (error) {
-        console.error('Error logging in:', error);
-      }
-    }
-
-    async function fetchCars() {
-      try {
-        const response = await fetch('/cars');
-        const cars = await response.json();
-
-        const carList = document.getElementById('carList');
-        carList.innerHTML = '';
-
-        cars.forEach((car) => {
-          const li = document.createElement('li');
-          li.innerHTML = `  
-            <h3>${car.name}</h3>
-            <p>Price: ${car.price}</p>
-            <p>Location: ${car.location}</p>
-            <div>
-              ${car.images.map((img) => `<img src="${img}" width="100" height="100">`).join('')}
-            </div>
-            <button onclick="deleteCar('${car._id}')">Delete</button>
-          `;
-          carList.appendChild(li);
-        });
-      } catch (error) {
-        console.error('Error fetching cars:', error);
-      }
-    }
-
-    async function deleteCar(carId) {
-      try {
-        const response = await fetch(`/delete-car/${carId}`, { method: 'DELETE' });
-
-        if (response.ok) {
-          alert('Car deleted successfully!');
-          fetchCars();
-        } else {
-          alert('Failed to delete car.');
-        }
-      } catch (error) {
-        console.error('Error deleting car:', error);
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
