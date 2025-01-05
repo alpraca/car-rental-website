@@ -11,7 +11,6 @@ async function login() {
     });
 
     if (response.ok) {
-      localStorage.setItem('isAdminLoggedIn', true); // Save login state
       document.getElementById('loginForm').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'block';
       fetchCars();
@@ -23,27 +22,12 @@ async function login() {
   }
 }
 
-// Check login status on page load
-document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('isAdminLoggedIn')) {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    fetchCars(); // Load cars on refresh
-  }
-});
-
-// Logout function
-function logout() {
-  localStorage.removeItem('isAdminLoggedIn'); // Clear login state
-  document.getElementById('loginForm').style.display = 'block';
-  document.getElementById('adminPanel').style.display = 'none';
-}
-
 async function fetchCars() {
   try {
     const response = await fetch('/cars');
     const cars = await response.json();
     renderCars(cars);
+    renderCarsForUsers(cars); // Also render cars for the user interface
   } catch (error) {
     console.error('Error fetching cars:', error);
   }
@@ -112,6 +96,7 @@ function renderCarsForUsers(cars) {
   });
 }
 
+
 // Fetch and render cars on page load
 async function loadCarsForUsers() {
   try {
@@ -126,6 +111,30 @@ async function loadCarsForUsers() {
 
 // Call the function on page load
 loadCarsForUsers();
+// Listen for user search input
+document.getElementById('searchBar1').addEventListener('input', function () {
+  const query = this.value.toLowerCase();
+  filterUserCars(query);
+});
+
+// Function to filter cars for the user page
+function filterUserCars(query) {
+  const userCarList = document.getElementById('userCarList');
+  const allCars = userCarList.querySelectorAll('.user-car-box');
+  
+  allCars.forEach(carDiv => {
+    const carName = carDiv.querySelector('h3').innerText.toLowerCase();
+    const carLocation = carDiv.querySelector('p:nth-child(3)').innerText.toLowerCase();
+
+    // Show or hide car based on search query
+    if (carName.includes(query) || carLocation.includes(query)) {
+      carDiv.style.display = 'flex';
+    } else {
+      carDiv.style.display = 'none';
+    }
+  });
+}
+
 
 async function addCar() {
   const name = document.getElementById('name').value;
@@ -158,23 +167,7 @@ async function addCar() {
   }
 }
 
-async function searchCars() {
-  const query = document.getElementById('searchBar').value;
 
-  try {
-    const response = await fetch(`/admin/search-cars?query=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      alert('Search failed. Please try again.');
-      return;
-    }
-
-    const cars = await response.json();
-    renderCars(cars);
-  } catch (error) {
-    console.error('Error searching for cars:', error);
-    alert('Failed to search for cars');
-  }
-}
 
 async function deleteCar(carId) {
   try {
@@ -234,7 +227,6 @@ async function deleteReservation(carId) {
 
     if (response.ok) {
       alert('Reservation removed successfully');
-     
       fetchCars();
     } else {
       alert('Failed to remove reservation');

@@ -6,10 +6,21 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const session = require('express-session'); // For session management
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Configure session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key', // Change to a strong secret
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600000 }, // 1 hour session timeout
+  })
+);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -54,19 +65,46 @@ const generateSerialCode = () => {
 // Global lock tracker
 let lockedCars = new Set(); // Store locked car IDs
 
-// Authentication middleware
+
+// Admin login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
   if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+    req.session.admin = true; // Store session for admin
     res.status(200).send({ message: 'Login successful' });
   } else {
     res.status(403).send({ message: 'Invalid username or password' });
   }
 });
+// Check if admin is logged in (persistence check)
+app.get('/is-logged-in', (req, res) => {
+  if (req.session.admin) {
+    res.status(200).send({ loggedIn: true });
+  } else {
+    res.status(200).send({ loggedIn: false });
+  }
+});
+
+// Admin logout (session destruction)
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) return res.status(500).send('Logout failed');
+    res.send('Logged out successfully');
+  });
+});
+
+// Middleware to check admin session
+function requireAdmin(req, res, next) {
+  if (req.session.admin) {
+    next();
+  } else {
+    res.status(403).send('Unauthorized');
+  }
+}
 
 // Add a car
-app.post('/add-car', upload.array('images', 10), async (req, res) => {
+app.post('/add-car', requireAdmin, upload.array('images', 10), async (req, res) => {
   try {
     const imageUrls = req.files.map((file) => '/uploads/' + file.filename);
 
@@ -90,7 +128,7 @@ app.post('/add-car', upload.array('images', 10), async (req, res) => {
 // Fetch all cars
 app.get('/cars', async (req, res) => {
   try {
-    const cars = await Car.find({}, 'name price location images serialCode reservations'); // Include all fields for admin
+    const cars = await Car.find({}, 'name price location images serialCode reservations');
     res.json(cars);
   } catch (error) {
     console.error('Error fetching cars:', error);
@@ -98,12 +136,11 @@ app.get('/cars', async (req, res) => {
   }
 });
 
-// Search for cars based on admin input
-app.get('/admin/search-cars', async (req, res) => {
+// Search for cars 
+app.get('/admin/search-cars', requireAdmin, async (req, res) => {
   try {
     const { query } = req.query;
 
-    // If no query is provided, return all cars
     const filter = query
       ? {
           $or: [
@@ -124,16 +161,14 @@ app.get('/admin/search-cars', async (req, res) => {
 });
 
 // Add reservation date with locking
-app.post('/car/:id/add-reservation', async (req, res) => {
+app.post('/car/:id/add-reservation', requireAdmin, async (req, res) => {
   const carId = req.params.id;
 
-  // Check if the car is locked
   if (lockedCars.has(carId)) {
     return res.status(409).send('This car is being updated by another admin. Try again later.');
   }
 
   try {
-    // Lock the car
     lockedCars.add(carId);
 
     const { date } = req.body;
@@ -147,29 +182,26 @@ app.post('/car/:id/add-reservation', async (req, res) => {
       return res.status(400).send('Invalid date format');
     }
 
-    car.reservations.push(reservationDate); // Add reservation
-    await car.save(); // Save changes to the database
+    car.reservations.push(reservationDate);
+    await car.save();
     res.send('Reservation added successfully');
   } catch (error) {
     console.error('Error adding reservation:', error);
     res.status(500).send('Server error');
   } finally {
-    // Unlock the car
     lockedCars.delete(carId);
   }
 });
 
 // Remove reservation date with locking
-app.post('/car/:id/remove-reservation', async (req, res) => {
+app.post('/car/:id/remove-reservation', requireAdmin, async (req, res) => {
   const carId = req.params.id;
 
-  // Check if the car is locked
   if (lockedCars.has(carId)) {
     return res.status(409).send('This car is being updated by another admin. Try again later.');
   }
 
   try {
-    // Lock the car
     lockedCars.add(carId);
 
     const { date } = req.body;
@@ -187,22 +219,19 @@ app.post('/car/:id/remove-reservation', async (req, res) => {
     console.error('Error removing reservation:', error);
     res.status(500).send('Server error');
   } finally {
-    // Unlock the car
     lockedCars.delete(carId);
   }
 });
 
 // Delete a car with locking
-app.delete('/delete-car/:id', async (req, res) => {
+app.delete('/delete-car/:id', requireAdmin, async (req, res) => {
   const carId = req.params.id;
 
-  // Check if the car is locked
   if (lockedCars.has(carId)) {
     return res.status(409).send('This car is being updated by another admin. Try again later.');
   }
 
   try {
-    // Lock the car
     lockedCars.add(carId);
 
     const car = await Car.findById(carId);
@@ -223,7 +252,6 @@ app.delete('/delete-car/:id', async (req, res) => {
     console.error('Error deleting car:', error);
     res.status(500).send('Server error');
   } finally {
-    // Unlock the car
     lockedCars.delete(carId);
   }
 });

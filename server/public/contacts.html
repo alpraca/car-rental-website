@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+</head>
+<style>
+  /* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body and Background */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+}
+
+/* Contact Page Section */
+.contact-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  background-image: url('rca.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+}
+
+/* Overlay for better text readability */
+.contact-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Dark semi-transparent overlay */
+  z-index: 1;
+  backdrop-filter: blur(10px); /* Background blur effect */
+}
+
+/* Contact Information Section */
+.contact-info {
+  z-index: 2;
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.contact-info h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.contact-info p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.contact-info ul {
+  list-style: none;
+  font-size: 1.1rem;
+}
+
+.contact-info li {
+  margin: 10px 0;
+}
+
+.contact-info a {
+  color: #25D366;
+  text-decoration: none;
+}
+
+/* Contact Form Section */
+.contact-form {
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 30px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.contact-form h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.contact-form input, .contact-form textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.contact-form button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #25D366;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.contact-form button:hover {
+  background-color: #1e8e4f;
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contact-page {
+      padding: 15px;
+  }
+
+  .contact-info h1 {
+      font-size: 2rem;
+  }
+
+  .contact-form h2 {
+      font-size: 1.5rem;
+  }
+
+  .contact-form input, .contact-form textarea {
+      font-size: 1rem;
+  }
+
+  .contact-form button {
+      font-size: 1.1rem;
+  }
+}
+
+</style>
+<body>
+    <section class="contact-page">
+        <!-- Contact Information Section -->
+        <div class="contact-info">
+            <h1>Get In Touch</h1>
+            <p>We’d love to hear from you! Whether you’re interested in our services, have a question, or want to collaborate, reach out to us. Let’s build something extraordinary together.</p>
+            <ul>
+                <li>Email: <a href="mailto:caralbaniarent@gmail.com">caralbaniarent@gmail.com</a></li>
+                <li>Phone: <a href="tel:+355694577986">+355 69 457 7986</a></li>
+                <li>Address:Tirane, Albania</li>
+            </ul>
+        </div>
+
+        <!-- Contact Form Section -->
+        <div class="contact-form">
+            <h2>Send Us a Message</h2>
+            <form action="contact.php" method="POST">
+              <input type="text" name="name" placeholder="Your Name" required>
+              <input type="email" name="email" placeholder="Your Email" required>
+              <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+              <button type="submit">Submit</button>
+          </form>
+          
+        </div>
+    </section>
+</body>
+</html>

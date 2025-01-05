@@ -1,39 +1,194 @@
+/* General Styling */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #e9e9e9, #ddf5f0); /* Gradient background */
+  color: #333;
+}
+
+/* Contact Us Button Style */
+.contact-button {
+  position: fixed; /* Changed to fixed for better placement across all screens */
+  top: 25px;
+  right: 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  z-index: 10;
+}
+
+.contact-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-color: #fff;
+  transform: scale(1.1);
+}
+
+/* Header Styling */
+header {
+  box-shadow: 0 4px 8px rgba(10, 92, 34, 0.527);
+  border-radius: 10px;
+  margin: 1rem;
+  padding: 2rem;
+  background-image: url('rca.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  height: 50vh;
+  color: rgb(89, 79, 79);
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+header h1 {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+  -webkit-background-clip: text;
+  background-clip: text;
+  box-shadow: 0px 4px 20px rgba(1,1,1,1);
+}
+
+header h1::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+  opacity: 0.7;
+  pointer-events: none;
+  box-shadow: inset 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Search Bar Styling */
+#searchBar1 {
+  width: 65%;
+  padding: 10px 15px;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#searchBar1::placeholder {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#searchBar1:focus {
+  outline: none;
+  border: 2px solid #766078;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   header {
-    padding: 1rem;
-    background-color: #007bff;
-    color: white;
-    text-align: center;
+    height: 40vh;
+    background-position: top center;
   }
-  
-  #searchBar {
+
+  header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+
+  #searchBar1 {
     width: 80%;
-    margin: 1rem auto;
-    display: block;
-    padding: 0.5rem;
+    font-size: 1rem;
   }
-  
-  main {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-    padding: 1rem;
+}
+
+@media (max-width: 480px) {
+  header {
+    height: 30vh;
+    background-position: top center;
   }
-  
-  .card {
-    width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 1rem;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
   }
-  
- 
-  
+
+  #searchBar1 {
+    width: 90%;
+    font-size: 0.9rem;
+  }
+}
+
+/* Page Container */
+main {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Car List Grid */
+#userCarList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Car Card */
+.user-car-box {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.user-car-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Car Image */
+.user-car-box img {
+  width: 100%;
+  height: auto;
+  max-width: 200px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Car Name */
+.user-car-box h3 {
+  font-size: 1.2rem;
+  color: #c4c4c6;
+  margin-bottom: 10px;
+}
+
+/* Price and Location */
+.user-car-box p {
+  margin: 5px 0;
+  font-size: 1rem;
+  color: #555;
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    img {
+      margin: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    img:hover {
+      border-color: #777;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 20px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .image-gallery img {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Car Rental Dashboard</h1>
+
+  <!-- Login form -->
+  <div id="loginForm">
+    <h2>Admin Login</h2>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- Admin panel -->
+  <div id="adminPanel" style="display: none;">
+    <button onclick="logout()">Logout</button>
+    <h2>Add a Car</h2>
+    <form id="addCarForm">
+      <input type="text" id="name" placeholder="Car Name" required>
+      <input type="text" id="price" placeholder="Car Price" required>
+      <input type="text" id="location" placeholder="Car Location" required>
+      <input type="file" id="images" name="images" multiple required>
+      <button type="button" onclick="addCar()">Add Car</button>
+    </form>
+
+    <h2>Search Cars</h2>
+    <input type="text" id="adminSearchBar" placeholder="Search cars...">
+
+    <h2>Cars List</h2>
+    <ul id="carList"></ul>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    
+    // Wait for DOM content to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Real-time filtering for the admin search input
+      document.getElementById('adminSearchBar').addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        filterAdminCars(query); // Call the function to filter cars
+      });
+    
+      // Function to filter cars on the admin page
+      function filterAdminCars(query) {
+        const adminCarList = document.getElementById('carList');
+        if (!adminCarList) return;
+    
+        const allAdminCars = adminCarList.querySelectorAll('.card');
+        allAdminCars.forEach(carDiv => {
+          const carName = carDiv.querySelector('h3').innerText.toLowerCase();
+          const carLocation = carDiv.querySelector('p:nth-child(3)').innerText.toLowerCase();
+          const carSerial = carDiv.querySelector('p:nth-child(4)').innerText.toLowerCase(); // Assuming serial is in the 4th <p> tag
+          const carPrice = carDiv.querySelector('p:nth-child(2)').innerText.toLowerCase(); // Assuming price is in the 2nd <p> tag
+    
+          // Show or hide car based on search query matching name, location, price, or serial number
+          if (carName.includes(query) || carLocation.includes(query) || carSerial.includes(query) || carPrice.includes(query)) {
+            carDiv.style.display = 'block'; // Show the car
+          } else {
+            carDiv.style.display = 'none'; // Hide the car
+          }
+        });
+      }
+    });
+    </script>
+    
+</body>
+</html>
