@@ -8,9 +8,12 @@ const multer = require('multer');
 const fs = require('fs');
 const session = require('express-session'); // For session management
 
+const nodemailer = require('nodemailer');
+
 const app = express();
 app.use(express.json());
 app.use(cors());
+
 
 // Configure session
 app.use(
@@ -159,7 +162,33 @@ app.get('/admin/search-cars', requireAdmin, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: process.env.EMAIL_USER, // Use .env to keep it secure
+      pass: process.env.EMAIL_PASS
+  }
+});
 
+app.post('/send-email', async (req, res) => {
+  const { name, email, message } = req.body;
+
+  const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: 'caralbaniarent@gmail.com',
+      subject: 'New Contact Form Message',
+      html: `<p><strong>Name:</strong> ${name}</p>
+             <p><strong>Email:</strong> ${email}</p>
+             <p><strong>Message:</strong> ${message}</p>`
+  };
+
+  try {
+      await transporter.sendMail(mailOptions);
+      res.json({ success: true, message: 'Email sent successfully!' });
+  } catch (error) {
+      res.status(500).json({ success: false, message: 'Error sending email', error: error.message });
+  }
+});
 // Add reservation date with locking
 app.post('/car/:id/add-reservation', requireAdmin, async (req, res) => {
   const carId = req.params.id;

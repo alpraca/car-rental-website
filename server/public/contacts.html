@@ -31,6 +31,8 @@ body {
   background-size: cover;
   background-position: center;
   padding: 20px;
+  
+  overflow-y: auto; 
 }
 
 /* Overlay for better text readability */
@@ -128,6 +130,8 @@ body {
 @media (max-width: 768px) {
   .contact-page {
       padding: 15px;
+      
+  overflow-y: auto; 
   }
 
   .contact-info h1 {
@@ -164,14 +168,34 @@ body {
         <!-- Contact Form Section -->
         <div class="contact-form">
             <h2>Send Us a Message</h2>
-            <form action="contact.php" method="POST">
-              <input type="text" name="name" placeholder="Your Name" required>
-              <input type="email" name="email" placeholder="Your Email" required>
-              <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+            <form id="contactForm">
+              <input type="text" name="name" id="name" placeholder="Your Name" required>
+              <input type="email" name="email" id="email" placeholder="Your Email" required>
+              <textarea name="message" id="message" placeholder="Your Message" rows="5" required></textarea>
               <button type="submit">Submit</button>
           </form>
           
         </div>
     </section>
+    <script>
+      document.getElementById("contactForm").addEventListener("submit", async function(event) {
+          event.preventDefault();
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const message = document.getElementById("message").value;
+
+          try {
+              const response = await fetch("http://localhost:3000/send-email", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name, email, message })
+              });
+              const result = await response.json();
+              alert(result.message);
+          } catch (error) {
+              alert("Error sending email");
+          }
+      });
+  </script>
 </body>
 </html>
