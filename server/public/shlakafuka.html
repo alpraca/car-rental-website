@@ -22,11 +22,137 @@
     }
     .card {
       border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .image-gallery {
+      margin: 15px 0;
     }
     .image-gallery img {
       margin-right: 5px;
+      border-radius: 4px;
+    }
+    
+    /* Edit functionality styles */
+    .edit-group {
+      margin-bottom: 15px;
+      position: relative;
+    }
+    
+    .edit-input {
+      width: 100%;
+      padding: 8px 12px;
+      margin: 4px 0;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    .edit-input:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+    
+    .button-group {
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .button-group button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+    
+    .edit-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .edit-btn:hover {
+      background-color: #45a049;
+    }
+    
+    .save-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+    
+    .save-btn:hover {
+      background-color: #1976D2;
+    }
+    
+    .cancel-btn {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    .cancel-btn:hover {
+      background-color: #d32f2f;
+    }
+    
+    .reservation-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Form styles */
+    #addCarForm {
+      display: grid;
+      gap: 15px;
+      max-width: 500px;
+      margin: 20px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #addCarForm input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    #addCarForm button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    #addCarForm button:hover {
+      background-color: #45a049;
+    }
+
+    /* Search bar styles */
+    #adminSearchBar {
+      width: 100%;
+      max-width: 500px;
+      padding: 10px 15px;
+      margin: 20px 0;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #adminSearchBar:focus {
+      border-color: #4CAF50;
+      outline: none;
     }
   </style>
 </head>
@@ -49,6 +175,7 @@
       <input type="text" id="name" placeholder="Car Name" required>
       <input type="text" id="price" placeholder="Car Price" required>
       <input type="text" id="location" placeholder="Car Location" required>
+      <input type="text" id="carOwner" placeholder="Car Owner" required>
       <input type="file" id="images" name="images" multiple required>
       <button type="button" onclick="addCar()">Add Car</button>
     </form>
@@ -80,11 +207,14 @@
         allAdminCars.forEach(carDiv => {
           const carName = carDiv.querySelector('h3').innerText.toLowerCase();
           const carLocation = carDiv.querySelector('p:nth-child(3)').innerText.toLowerCase();
-          const carSerial = carDiv.querySelector('p:nth-child(4)').innerText.toLowerCase(); // Assuming serial is in the 4th <p> tag
-          const carPrice = carDiv.querySelector('p:nth-child(2)').innerText.toLowerCase(); // Assuming price is in the 2nd <p> tag
+          const carSerial = carDiv.querySelector('p:nth-child(4)').innerText.toLowerCase();
+          const carPrice = carDiv.querySelector('p:nth-child(2)').innerText.toLowerCase();
+          const carOwner = carDiv.querySelector('p:nth-child(5)').innerText.toLowerCase();
     
-          // Show or hide car based on search query matching name, location, price, or serial number
-          if (carName.includes(query) || carLocation.includes(query) || carSerial.includes(query) || carPrice.includes(query)) {
+          // Show or hide car based on search query matching name, location, price, serial number, or owner
+          if (carName.includes(query) || carLocation.includes(query) || 
+              carSerial.includes(query) || carPrice.includes(query) || 
+              carOwner.includes(query)) {
             carDiv.style.display = 'block'; // Show the car
           } else {
             carDiv.style.display = 'none'; // Hide the car
