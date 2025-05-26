@@ -3,32 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <title>RCA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Rent a Car Albania</title>
 </head>
 <body>
   <header id="header">
-    <a href="contacts.html" class="contact-button">Contact Us</a>
-    <img id="headerImage" src="rca.jpg" style="display:none;" />
-    <h1>Rent a Car   Albania</h1>
-    <input type="text" id="searchBar1" placeholder="Rent a Car Now...">
+    <nav class="nav-container">
+      <div class="logo">
+        <h1>Rent a Car Albania</h1>
+      </div>
+      <div class="nav-links">
+        <a href="contacts.html" class="contact-button">Contact Us</a>
+      </div>
+    </nav>
+    <div class="hero-section">
+      <div class="search-container">
+        <input type="text" id="searchBar1" placeholder="Search for your perfect car...">
+      </div>
+    </div>
   </header>
 
   <main>
-    <div id="userCarList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
-  </main>  
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="priceFilter">Price Range</label>
+        <select id="priceFilter">
+          <option value="">All Prices</option>
+          <option value="low">Low to High</option>
+          <option value="high">High to Low</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="locationFilter">Location</label>
+        <select id="locationFilter">
+          <option value="">All Locations</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="userCarList" class="car-grid"></div>
+  </main>
+
+  <!-- Image Gallery Modal -->
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <div class="modal-gallery">
+        <button class="gallery-nav prev-btn">&lt;</button>
+        <div class="gallery-container">
+          <img src="" alt="Car Image">
+        </div>
+        <button class="gallery-nav next-btn">&gt;</button>
+      </div>
+      <div class="gallery-thumbnails"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>About Us</h3>
+        <p>Your trusted partner for car rentals in Albania</p>
+      </div>
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <a href="contacts.html">Contact Us</a>
+        <a href="#">Terms & Conditions</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+      <div class="footer-section">
+        <h3>Contact Info</h3>
+        <p>Phone: +355 69 457 7986</p>
+        <p>Email: info@rentacaralbania.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Rent a Car Albania. All rights reserved.</p>
+    </div>
+  </footer>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
-  <script src="script.js"></script>
+  <script src="js/gallery.js"></script>
+  <script src="js/admin.js"></script>
   <script>
     window.chatbaseConfig = {
-        chatbotId: "0JC0h2M0yYk27Uply9kKL",
+      chatbotId: "0JC0h2M0yYk27Uply9kKL",
     }
-</script>
-  
-
-  <script>
-  (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="0JC0h2M0yYk27Uply9kKL";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
   </script>
-  
 </body>
 </html>
