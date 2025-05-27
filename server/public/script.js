@@ -41,49 +41,66 @@ function renderCars(cars) {
     li.className = 'card';
     li.innerHTML = `
       <div class="car-details" id="car-${car._id}">
-        <div class="edit-group">
-          <h3 class="display-value">${car.name}</h3>
-          <input type="text" class="edit-input" value="${car.name}" style="display: none;">
+        <div class="car-images">
+          ${car.images && car.images.length > 0 ? 
+            `<div class="image-gallery">
+              ${car.images.map(img => `
+                <div class="image-container">
+                  <img src="${img}" alt="Car Image" class="car-image">
+                </div>
+              `).join('')}
+            </div>` : 
+            '<p>No images available</p>'
+          }
         </div>
         
-        <div class="edit-group">
-          <p class="display-value">Price: ${car.price}</p>
-          <input type="text" class="edit-input" value="${car.price}" style="display: none;">
-        </div>
-        
-        <div class="edit-group">
-          <p class="display-value">Location: ${car.location}</p>
-          <input type="text" class="edit-input" value="${car.location}" style="display: none;">
-        </div>
-        
-        <div class="edit-group">
-          <p class="display-value">Serial Code: ${car.serialCode}</p>
-          <input type="text" class="edit-input" value="${car.serialCode}" style="display: none;">
-        </div>
-        
-        <div class="edit-group">
-          <p class="display-value">Car Owner: ${car.carOwner || 'Not specified'}</p>
-          <input type="text" class="edit-input" value="${car.carOwner || ''}" style="display: none;">
-        </div>
+        <div class="car-info">
+          <div class="edit-group">
+            <h3 class="display-value">${car.name}</h3>
+            <input type="text" class="edit-input" value="${car.name}" style="display: none;">
+          </div>
+          
+          <div class="edit-group">
+            <p class="display-value">Price: ${car.price}</p>
+            <input type="text" class="edit-input" value="${car.price}" style="display: none;">
+          </div>
+          
+          <div class="edit-group">
+            <p class="display-value">Location: ${car.location}</p>
+            <input type="text" class="edit-input" value="${car.location}" style="display: none;">
+          </div>
+          
+          <div class="edit-group">
+            <p class="display-value">Serial Code: ${car.serialCode}</p>
+            <input type="text" class="edit-input" value="${car.serialCode}" style="display: none;">
+          </div>
+          
+          <div class="edit-group">
+            <p class="display-value">Car Owner: ${car.carOwner || 'Not specified'}</p>
+            <input type="text" class="edit-input" value="${car.carOwner || ''}" style="display: none;">
+          </div>
+          
+          <div class="button-group">
+            <button class="edit-btn" onclick="toggleEdit('${car._id}')">Edit</button>
+            <button class="save-btn" onclick="saveChanges('${car._id}')" style="display: none;">Save</button>
+            <button class="cancel-btn" onclick="cancelEdit('${car._id}')" style="display: none;">Cancel</button>
+            <button class="delete-btn" onclick="deleteCar('${car._id}')">Delete</button>
+          </div>
 
-        <div class="image-gallery">
-          ${car.images.map(img => `<img src="${img}" width="100">`).join('')}
-        </div>
-        
-        <div class="button-group">
-          <button class="edit-btn" onclick="toggleEdit('${car._id}')">Edit</button>
-          <button class="save-btn" onclick="saveChanges('${car._id}')" style="display: none;">Save</button>
-          <button class="cancel-btn" onclick="cancelEdit('${car._id}')" style="display: none;">Cancel</button>
-          <button onclick="deleteCar('${car._id}')">Delete</button>
-        </div>
-
-        <div class="reservation-section">
-          <input type="date" id="reservationDate-${car._id}">
-          <button onclick="addReservation('${car._id}')">Add Reservation</button>
-          <button onclick="deleteReservation('${car._id}')">Remove Reservation</button>
-          <div id="reservations-${car._id}">
-            <h4>Reservations:</h4>
-            ${car.reservations.map(date => `<p>${new Date(date).toLocaleDateString()}</p>`).join('')}
+          <div class="reservation-section">
+            <h4>Add Reservation</h4>
+            <div class="reservation-inputs">
+              <input type="date" id="reservationDate-${car._id}" class="date-input">
+              <button class="add-reservation-btn" onclick="addReservation('${car._id}')">Add</button>
+              <button class="remove-reservation-btn" onclick="deleteReservation('${car._id}')">Remove</button>
+            </div>
+            <div id="reservations-${car._id}" class="reservations-list">
+              <h4>Current Reservations:</h4>
+              ${car.reservations && car.reservations.length > 0 ? 
+                car.reservations.map(date => `<p>${new Date(date).toLocaleDateString()}</p>`).join('') :
+                '<p>No reservations</p>'
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -92,34 +109,46 @@ function renderCars(cars) {
   });
 }
 
+// Global variables for image gallery
+let currentImageIndex = 0;
+let currentCarImages = [];
+let cars = []; // Global cars array
+
+// Update the loadCarsForUsers function to store cars globally
+async function loadCarsForUsers() {
+  try {
+    const response = await fetch('/cars');
+    cars = await response.json(); // Store cars globally
+    renderCarsForUsers(cars);
+  } catch (error) {
+    console.error('Error loading cars for users:', error);
+    alert('Failed to load cars. Please try again later.');
+  }
+}
+
 function renderCarsForUsers(cars) {
   const userCarList = document.getElementById('userCarList');
-  if (!userCarList) return; // Ensure we are on the user page
+  if (!userCarList) return;
 
-  userCarList.innerHTML = ''; // Clear previous cars
+  userCarList.innerHTML = '';
 
   cars.forEach((car) => {
     const div = document.createElement('div');
     div.className = 'user-car-box';
-    div.style.border = '1px solid #ddd';
-    div.style.margin = '10px';
-    div.style.padding = '10px';
-    div.style.display = 'flex';
-    div.style.alignItems = 'center';
-    div.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
-    div.style.borderRadius = '5px';
-
+    
     const message = encodeURIComponent(
-      `Hello, I am interested in renting this car:\n\nName: ${car.name}\nPrice: ${car.price}\nLocation: ${car.location}`
+      `Hello, I am interested in renting this car:\n\nName: ${car.name}\nPrice: ${car.price}\nLocation: ${car.location}\nSerial Code: ${car.serialCode}`
     );
 
     div.innerHTML = `
-      <img src="${car.images[0] || 'placeholder.jpg'}" alt="Car Image" style="width: 150px; height: 100px; margin-right: 15px; object-fit: cover; border-radius: 5px;">
-      <div>
+      <div class="image-gallery" onclick="openImageGallery('${car._id}')">
+        <img src="${car.images[0] || 'placeholder.jpg'}" alt="Car Image">
+      </div>
+      <div class="car-info">
         <h3>${car.name}</h3>
         <p><strong>Price:</strong> ${car.price}</p>
         <p><strong>Location:</strong> ${car.location}</p>
-        <a href="https://wa.me/355694577986?text=${message}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #25D366; color: white; text-decoration: none; border-radius: 5px;">
+        <a href="https://wa.me/355694577986?text=${message}" target="_blank" class="rent-button">
           Rent
         </a>
       </div>
@@ -128,21 +157,113 @@ function renderCarsForUsers(cars) {
   });
 }
 
-
-// Fetch and render cars on page load
-async function loadCarsForUsers() {
-  try {
-    const response = await fetch('/cars');
-    const cars = await response.json();
-    renderCarsForUsers(cars);
-  } catch (error) {
-    console.error('Error loading cars for users:', error);
-    alert('Failed to load cars. Please try again later.');
+function openImageGallery(carId) {
+  console.log('Opening gallery for car:', carId); // Debug log
+  const car = cars.find(c => c._id === carId);
+  console.log('Found car:', car); // Debug log
+  
+  if (!car || !car.images || car.images.length === 0) {
+    console.log('No images found for car'); // Debug log
+    return;
   }
+
+  currentCarImages = car.images;
+  currentImageIndex = 0;
+  updateGalleryView();
+  
+  const modal = document.getElementById('imageModal');
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
 }
 
-// Call the function on page load
-loadCarsForUsers();
+function closeImageGallery() {
+  const modal = document.getElementById('imageModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function updateGalleryView() {
+  const mainImage = document.querySelector('.gallery-container img');
+  const thumbnailsContainer = document.querySelector('.gallery-thumbnails');
+  
+  if (!mainImage || !thumbnailsContainer) {
+    console.error('Gallery elements not found');
+    return;
+  }
+  
+  // Update main image
+  mainImage.src = currentCarImages[currentImageIndex];
+  
+  // Update thumbnails
+  thumbnailsContainer.innerHTML = '';
+  currentCarImages.forEach((image, index) => {
+    const thumbnail = document.createElement('img');
+    thumbnail.src = image;
+    thumbnail.className = `thumbnail ${index === currentImageIndex ? 'active' : ''}`;
+    thumbnail.onclick = () => {
+      currentImageIndex = index;
+      updateGalleryView();
+    };
+    thumbnailsContainer.appendChild(thumbnail);
+  });
+}
+
+function showNextImage() {
+  currentImageIndex = (currentImageIndex + 1) % currentCarImages.length;
+  updateGalleryView();
+}
+
+function showPrevImage() {
+  currentImageIndex = (currentImageIndex - 1 + currentCarImages.length) % currentCarImages.length;
+  updateGalleryView();
+}
+
+// Initialize event listeners when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Load cars when the page loads
+  loadCarsForUsers();
+
+  // Set up gallery controls
+  const modal = document.getElementById('imageModal');
+  const closeBtn = document.querySelector('.close-modal');
+  const prevBtn = document.querySelector('.prev-btn');
+  const nextBtn = document.querySelector('.next-btn');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeImageGallery);
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', showPrevImage);
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', showNextImage);
+  }
+
+  // Close modal when clicking outside the image
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeImageGallery();
+      }
+    });
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (modal && modal.style.display === 'block') {
+      if (e.key === 'Escape') {
+        closeImageGallery();
+      } else if (e.key === 'ArrowLeft') {
+        showPrevImage();
+      } else if (e.key === 'ArrowRight') {
+        showNextImage();
+      }
+    }
+  });
+});
+
 // Listen for user search input
 document.getElementById('searchBar1').addEventListener('input', function () {
   const query = this.value.toLowerCase();
@@ -166,7 +287,6 @@ function filterUserCars(query) {
     }
   });
 }
-
 
 async function addCar() {
   const name = document.getElementById('name').value;
@@ -200,8 +320,6 @@ async function addCar() {
     console.error('Error adding car:', error);
   }
 }
-
-
 
 async function deleteCar(carId) {
   try {
@@ -411,4 +529,15 @@ function cancelEdit(carId) {
   editBtn.style.display = 'inline-block';
   saveBtn.style.display = 'none';
   cancelBtn.style.display = 'none';
+}
+
+// Update the createCarCard function to include gallery functionality
+function createCarCard(car) {
+  // ... existing car card creation code ...
+  
+  // Update the image container to be clickable
+  const imageContainer = carCard.querySelector('.image-gallery');
+  imageContainer.onclick = () => openImageGallery(car.id);
+  
+  // ... rest of existing car card creation code ...
 }
