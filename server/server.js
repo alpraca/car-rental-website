@@ -1,5 +1,5 @@
 // server.js
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -313,15 +313,15 @@ app.post('/car/:id/remove-reservation', requireAdmin, async (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
+
+// Serve static files - IMPORTANT: This should be before the catch-all route
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Catch-all route for API endpoints
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
-
-// Serve static files - IMPORTANT: This should be the last middleware
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
