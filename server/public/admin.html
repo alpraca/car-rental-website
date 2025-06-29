@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Car Rental</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .admin-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .car-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .car-card button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .edit-btn {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .add-btn {
+            background-color: #198754;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="admin-controls">
+            <button class="add-btn" onclick="showAddCarForm()">Add New Car</button>
+            <button onclick="window.location.href='/logout'">Logout</button>
+        </div>
+
+        <div id="carList">
+            Loading cars...
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display cars with admin controls
+        fetch('/cars')
+            .then(response => response.json())
+            .then(cars => {
+                const carList = document.getElementById('carList');
+                if (cars.length === 0) {
+                    carList.innerHTML = 'No cars available.';
+                    return;
+                }
+                
+                carList.innerHTML = cars.map(car => `
+                    <div class="car-card">
+                        <h3>${car.name}</h3>
+                        <p>Price: ${car.price}</p>
+                        <p>Location: ${car.location}</p>
+                        <p>Serial Code: ${car.serialCode}</p>
+                        <p>Owner: ${car.carOwner || 'Not specified'}</p>
+                        <button class="edit-btn" onclick="editCar('${car._id}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteCar('${car._id}')">Delete</button>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('carList').innerHTML = 'Error loading cars.';
+            });
+
+        function deleteCar(id) {
+            if (confirm('Are you sure you want to delete this car?')) {
+                fetch(`/delete-car/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Car deleted successfully');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting car');
+                });
+            }
+        }
+
+        function editCar(id) {
+            // Implement edit functionality
+            alert('Edit functionality to be implemented');
+        }
+
+        function showAddCarForm() {
+            // Implement add car form
+            alert('Add car functionality to be implemented');
+        }
+    </script>
+</body>
+</html> 

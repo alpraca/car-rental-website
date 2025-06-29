@@ -5,7 +5,6 @@ class ImageGallery {
         this.currentCarImages = [];
         this.cars = [];
         this.modal = document.getElementById('imageModal');
-        this.init();
     }
 
     init() {
@@ -23,13 +22,20 @@ class ImageGallery {
         }
 
         if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.showPrevImage());
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showPrevImage();
+            });
         }
 
         if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.showNextImage());
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showNextImage();
+            });
         }
 
+        // Close modal when clicking outside the image
         if (this.modal) {
             this.modal.addEventListener('click', (e) => {
                 if (e.target === this.modal) {
@@ -38,6 +44,7 @@ class ImageGallery {
             });
         }
 
+        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (this.modal && this.modal.style.display === 'block') {
                 if (e.key === 'Escape') {
@@ -106,38 +113,68 @@ class ImageGallery {
     }
 
     closeGallery() {
-        this.modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        if (this.modal) {
+            this.modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
     }
 
     updateGalleryView() {
         const mainImage = document.querySelector('.gallery-container img');
         const thumbnailsContainer = document.querySelector('.gallery-thumbnails');
         
-        if (!mainImage || !thumbnailsContainer) return;
+        if (!mainImage || !thumbnailsContainer || !this.currentCarImages.length) return;
         
+        // Ensure currentImageIndex is within bounds
+        this.currentImageIndex = Math.max(0, Math.min(this.currentImageIndex, this.currentCarImages.length - 1));
+        
+        // Update main image
         mainImage.src = this.currentCarImages[this.currentImageIndex];
         
+        // Update thumbnails
         thumbnailsContainer.innerHTML = '';
         this.currentCarImages.forEach((image, index) => {
             const thumbnail = document.createElement('img');
             thumbnail.src = image;
+            thumbnail.alt = `Thumbnail ${index + 1}`;
             thumbnail.className = `thumbnail ${index === this.currentImageIndex ? 'active' : ''}`;
-            thumbnail.onclick = () => {
+            thumbnail.onclick = (e) => {
+                e.stopPropagation();
                 this.currentImageIndex = index;
                 this.updateGalleryView();
             };
             thumbnailsContainer.appendChild(thumbnail);
         });
+
+        // Update navigation buttons visibility
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        
+        if (prevBtn) {
+            prevBtn.style.visibility = this.currentCarImages.length > 1 ? 'visible' : 'hidden';
+        }
+        if (nextBtn) {
+            nextBtn.style.visibility = this.currentCarImages.length > 1 ? 'visible' : 'hidden';
+        }
     }
 
     showNextImage() {
-        this.currentImageIndex = (this.currentImageIndex + 1) % this.currentCarImages.length;
+        if (!this.currentCarImages.length) return;
+        
+        this.currentImageIndex++;
+        if (this.currentImageIndex >= this.currentCarImages.length) {
+            this.currentImageIndex = 0;
+        }
         this.updateGalleryView();
     }
 
     showPrevImage() {
-        this.currentImageIndex = (this.currentImageIndex - 1 + this.currentCarImages.length) % this.currentCarImages.length;
+        if (!this.currentCarImages.length) return;
+        
+        this.currentImageIndex--;
+        if (this.currentImageIndex < 0) {
+            this.currentImageIndex = this.currentCarImages.length - 1;
+        }
         this.updateGalleryView();
     }
 }
@@ -145,4 +182,5 @@ class ImageGallery {
 // Initialize gallery when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.gallery = new ImageGallery();
+    window.gallery.init();
 }); 

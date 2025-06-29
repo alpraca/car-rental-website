@@ -55,39 +55,39 @@ function renderCars(cars) {
         </div>
         
         <div class="car-info">
-          <div class="edit-group">
-            <h3 class="display-value">${car.name}</h3>
-            <input type="text" class="edit-input" value="${car.name}" style="display: none;">
-          </div>
-          
-          <div class="edit-group">
-            <p class="display-value">Price: ${car.price}</p>
-            <input type="text" class="edit-input" value="${car.price}" style="display: none;">
-          </div>
-          
-          <div class="edit-group">
-            <p class="display-value">Location: ${car.location}</p>
-            <input type="text" class="edit-input" value="${car.location}" style="display: none;">
-          </div>
-          
-          <div class="edit-group">
-            <p class="display-value">Serial Code: ${car.serialCode}</p>
-            <input type="text" class="edit-input" value="${car.serialCode}" style="display: none;">
-          </div>
-          
-          <div class="edit-group">
-            <p class="display-value">Car Owner: ${car.carOwner || 'Not specified'}</p>
-            <input type="text" class="edit-input" value="${car.carOwner || ''}" style="display: none;">
-          </div>
-          
-          <div class="button-group">
-            <button class="edit-btn" onclick="toggleEdit('${car._id}')">Edit</button>
-            <button class="save-btn" onclick="saveChanges('${car._id}')" style="display: none;">Save</button>
-            <button class="cancel-btn" onclick="cancelEdit('${car._id}')" style="display: none;">Cancel</button>
+        <div class="edit-group">
+          <h3 class="display-value">${car.name}</h3>
+          <input type="text" class="edit-input" value="${car.name}" style="display: none;">
+        </div>
+        
+        <div class="edit-group">
+          <p class="display-value">Price: ${car.price}</p>
+          <input type="text" class="edit-input" value="${car.price}" style="display: none;">
+        </div>
+        
+        <div class="edit-group">
+          <p class="display-value">Location: ${car.location}</p>
+          <input type="text" class="edit-input" value="${car.location}" style="display: none;">
+        </div>
+        
+        <div class="edit-group">
+          <p class="display-value">Serial Code: ${car.serialCode}</p>
+          <input type="text" class="edit-input" value="${car.serialCode}" style="display: none;">
+        </div>
+        
+        <div class="edit-group">
+          <p class="display-value">Car Owner: ${car.carOwner || 'Not specified'}</p>
+          <input type="text" class="edit-input" value="${car.carOwner || ''}" style="display: none;">
+        </div>
+        
+        <div class="button-group">
+          <button class="edit-btn" onclick="toggleEdit('${car._id}')">Edit</button>
+          <button class="save-btn" onclick="saveChanges('${car._id}')" style="display: none;">Save</button>
+          <button class="cancel-btn" onclick="cancelEdit('${car._id}')" style="display: none;">Cancel</button>
             <button class="delete-btn" onclick="deleteCar('${car._id}')">Delete</button>
-          </div>
+        </div>
 
-          <div class="reservation-section">
+        <div class="reservation-section">
             <h4>Add Reservation</h4>
             <div class="reservation-inputs">
               <input type="date" id="reservationDate-${car._id}" class="date-input">
@@ -135,7 +135,7 @@ function renderCarsForUsers(cars) {
   cars.forEach((car) => {
     const div = document.createElement('div');
     div.className = 'user-car-box';
-    
+
     const message = encodeURIComponent(
       `Hello, I am interested in renting this car:\n\nName: ${car.name}\nPrice: ${car.price}\nLocation: ${car.location}\nSerial Code: ${car.serialCode}`
     );
@@ -221,7 +221,7 @@ function showPrevImage() {
 // Initialize event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   // Load cars when the page loads
-  loadCarsForUsers();
+loadCarsForUsers();
 
   // Set up gallery controls
   const modal = document.getElementById('imageModal');

@@ -9,24 +9,29 @@ yarn-error.log
 .env.local
 .env.*.local
 
-# IDE
+# Build output
+dist/
+build/
+
+# IDE and editor files
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# OS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # Logs
 logs
 *.log
 
-# Build
-dist/
-build/
-
-# Uploads
+# Uploaded files
 server/public/uploads/*
 !server/public/uploads/.gitkeep 
